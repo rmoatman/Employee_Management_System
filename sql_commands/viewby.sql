@@ -10,7 +10,7 @@ SELECT * FROM department;
 
 -- to SHOW all roles
 SELECT 
-	role.id AS "ID Number",
+	role.id AS "Role ID Number",
     role.title AS Title,
     role.salary AS Salary,
     department.dept_name AS Department
@@ -37,5 +37,28 @@ ON role.department_id = department.id
 		ON employee.manager_id = manager_name.id
         
 	-- to SHOW employees meeting a certain criteria
+		-- by id
+			SELECT employee.id, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department
+				FROM department, employee, role
+				WHERE employee.manager_id=role.id
+				AND role.id=department.id
+				-- change employee number to input variable
+        		AND employee.id = 1
+
+		-- by last name
+			SELECT employee.id, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department
+				FROM department, employee, role
+				WHERE employee.manager_id=role.id
+				AND role.id=department.id
+				-- change employee name to input variable
+        		AND employee.last_name = "Love"
+
+		-- by role
+			SELECT role.title AS Title, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department
+				FROM department, employee, role
+				WHERE employee.role_id=role.id
+				AND role.department_id=department.id
+				-- change role.title to input variable
+                AND role.title = "TA"
 
 
