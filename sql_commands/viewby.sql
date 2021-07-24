@@ -61,4 +61,13 @@ ON role.department_id = department.id
 				-- change role.title to input variable
                 AND role.title = "TA"
 
+		-- by salary
+			SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee, r.salary AS Salary
+				FROM employee AS e, role AS r
+				WHERE e.role_id=r.id
+                -- replace > with other operators
+                -- replace 25000 with input
+                AND r.salary > 20000
+			
+
 

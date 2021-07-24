@@ -8,12 +8,12 @@ INSERT INTO department (id, dept_name)
 
 INSERT INTO role (id, title, salary, department_id)
     VALUES
-        (001, "MTL", "Salaried", 01),
-        (002, "ATL", "Hourly", 02),
-        (003, "ATL", "Hourly", 03),
-        (004, "TA", "Commissioned", 01),
-        (005, "TA", "Commissioned", 02),
-        (006, "TA", "Commissioned", 03);
+        (001, "MTL", 50000, 01),
+        (002, "ATL", 35001, 02),
+        (003, "ATL", 35002, 03),
+        (004, "TA", 20000, 01),
+        (005, "TA", 20001, 02),
+        (006, "TA", 20002, 03);
 
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
     VALUES
