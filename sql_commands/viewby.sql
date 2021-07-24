@@ -62,12 +62,12 @@ ON role.department_id = department.id
                 AND role.title = "TA"
 
 		-- by salary
-			SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee, r.salary AS Salary
-				FROM employee AS e, role AS r
-				WHERE e.role_id=r.id
+			SELECT CONCAT(first_name, " ", last_name) AS Employee, salary AS Salary
+				FROM employee, role
+				WHERE employee.role_id=role.id
                 -- replace > with other operators
                 -- replace 25000 with input
-                AND r.salary > 20000
+                AND role.salary > 20000
 			
 
 
