@@ -91,7 +91,6 @@ function viewMenu() {
   }) 
 }; // end of viewMenu
 
-
 function viewAllEmp() {
   console.log("All Employees:");
   db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department, role.title AS Title FROM department, employee, role WHERE employee.manager_id=role.id AND role.id=department.id', function (err, results) {
@@ -100,9 +99,6 @@ function viewAllEmp() {
     mainMenu();
   });
 }; // end of viewAllEmp();
-
-
-
 
 function viewAllEmpByRol(){
 
@@ -117,8 +113,9 @@ function viewAllEmpByRol(){
       };
     }
 
-    console.clear();
-    inquirer
+  console.clear();
+
+  inquirer
     .prompt([
       {
       type:'list',
@@ -129,18 +126,55 @@ function viewAllEmpByRol(){
     ]).then ((answer) => {
 
       db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, role.title AS Role, dept_name AS Department FROM role INNER JOIN employee ON role.id = employee.role_id INNER JOIN department ON role.department_id = department.id WHERE role.title = ?', [answer.viewRole], function (err, results) {
-        
+
         console.table(results);
         mainMenu();
-      })
-
+      }) // end of query
     }) // end of then
-  }) // end of query
+  }) // end of inquirer
 }; // end of viewAllEmpByRol
 
 
+function viewAllEmpByMng(){
 
-function viewAllEmpByMng(){};
+  const mngrList = [];
+  
+    db.query('SELECT CONCAT(manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id', function (err, results) {
+      console.log("results");
+      console.log(results);
+      console.log
+      for (i = 0; i < results.length; i++){
+        if(!mngrList.includes(results[i].Manager)){
+          mngrList.push(results[i].Manager);
+        };
+      }
+  
+    console.clear();
+  
+    inquirer
+      .prompt([
+        {
+        type:'list',
+        name:'viewMngr',
+        message: "Which manager you like to view?",
+        choices: mngrList,
+        }, 
+      ]).then ((answer) => {
+  
+        db.query('SELECT CONCAT(employee.first_name, " ", employee.last_name) AS Employee, CONCAT (manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id WHERE CONCAT (manager_name.first_name, " ", manager_name.last_name) = ?', [answer.viewMngr], function (err, results) {
+  
+        console.table(results);
+        mainMenu();
+
+        }) // end of query
+      }) // end of then
+    }) // end of inquirer
+  }; // end of viewAllEmpByRol
+
+
+
+
+
 function viewAAllEmpByDept(){};
 function viewSingEmp(){}
 
