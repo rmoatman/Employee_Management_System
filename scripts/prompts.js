@@ -1,3 +1,4 @@
+const { response } = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 //const db = require ('../express')
@@ -18,18 +19,18 @@ const db = mysql.createConnection(
 // MAIN MENU //
 function mainMenu(){
   inquirer
-      .prompt([
-        {
-        type:'list',
-        name:'tasks',
-        message: "What would you like to do?",
-        choices: [
-          "View Existing Employee, Manager, or Department",
-          "Modify Existing Employee, Manager, or Department",
-          "Add New Employee, Manager, or Department",
-          "EXIT",
-          ],
-        }, 
+    .prompt([
+      {
+      type:'list',
+      name:'tasks',
+      message: "What would you like to do?",
+      choices: [
+        "View Existing Employee, Manager, or Department",
+        "Modify Existing Employee, Manager, or Department",
+        "Add New Employee, Manager, or Department",
+        "EXIT",
+        ],
+      }, 
       
     ]).then ((answer) => {
         switch (answer.tasks) {
@@ -100,7 +101,45 @@ function viewAllEmp() {
   });
 }; // end of viewAllEmp();
 
-function viewAllEmpByRol(){};
+
+
+
+function viewAllEmpByRol(){
+
+  const roleList = [];
+
+  db.query('SELECT title FROM role', function (err, results) {
+    console.log("results");
+    console.log(results);
+    for (i = 0; i < results.length; i++){
+      if(!roleList.includes(results[i].title)){
+        roleList.push(results[i].title);
+      };
+    }
+
+    console.clear();
+    inquirer
+    .prompt([
+      {
+      type:'list',
+      name:'viewRole',
+      message: "Which role would you like to view?",
+      choices: roleList
+      }, 
+    ]).then ((answer) => {
+
+      db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, role.title AS Role, dept_name AS Department FROM role INNER JOIN employee ON role.id = employee.role_id INNER JOIN department ON role.department_id = department.id WHERE role.title = ?', [answer.viewRole], function (err, results) {
+        
+        console.table(results);
+        mainMenu();
+      })
+
+    }) // end of then
+  }) // end of query
+}; // end of viewAllEmpByRol
+
+
+
 function viewAllEmpByMng(){};
 function viewAAllEmpByDept(){};
 function viewSingEmp(){}
