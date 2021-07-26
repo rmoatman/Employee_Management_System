@@ -1,7 +1,5 @@
-const { response } = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-//const db = require ('../express')
 
 const db = mysql.createConnection(
   {
@@ -141,9 +139,7 @@ function viewAllEmpByMng() {
   const mngrList = [];
   
     db.query('SELECT CONCAT(manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id', function (err, results) {
-      console.log("results");
-      console.log(results);
-      console.log
+
       for (i = 0; i < results.length; i++){
         if(!mngrList.includes(results[i].Manager)){
           mngrList.push(results[i].Manager);
@@ -164,13 +160,12 @@ function viewAllEmpByMng() {
   
         db.query('SELECT CONCAT(employee.first_name, " ", employee.last_name) AS Employee, CONCAT (manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id WHERE CONCAT (manager_name.first_name, " ", manager_name.last_name) = ?', [answer.viewMngr], function (err, results) {
         
-        console.log("");
-        console.log(`Employees who work for ${answer.viewMngr}:`)
-        console.table(results);
-        console.log("");
-        mainMenu();
+          console.log("");
+          console.log(`Employees who work for ${answer.viewMngr}:`)
+          console.table(results);
+          console.log("");
+          mainMenu();
  
-
         }) // end of query
       }) // end of then
     }) // end of inquirer
@@ -250,9 +245,7 @@ function viewSingEmp() {
         }) // end of query
       }) // end of then
     }) // end of inquirer
-  }; // end of viewSingEMp
-
-
+}; // end of viewSingEMp
 
 // MODIFY MENU
 function modifyRole() {
@@ -278,10 +271,8 @@ function modifyRole() {
     ]).then ((answer) => {
       // get roleList
       const emplToUpdate = JSON.stringify(answer.empToMod);
-      console.log("emplToUpdate");
-      console.log(emplToUpdate);
-
       const roleList = [];
+
       db.query('SELECT title AS roleid from role', function (err, results) {
         for (i = 0; i < results.length; i++){
           if(!roleList.includes(results[i].roleid)){
@@ -300,64 +291,32 @@ function modifyRole() {
 
         ]).then ((answer) => {
           const roleToUpdate = JSON.stringify(answer.newRole);
-          console.log("roleToUpdate");
-          console.log(typeof(roleToUpdate));
-          console.log(roleToUpdate);
-
           const nameStr = emplToUpdate.replace( /"/g, "");
           const nameObj = nameStr.split(" ");
-         // const last = emplToUpdate.split(" ");
-          console.log("nameObj");
-          console.log(nameObj[0]);
-          console.log(nameObj[1]);
-          //console.log(last);
 
-
-        // get employee number
+          // get employee number
           db.query('SELECT employee.id AS ID FROM employee WHERE first_name = ? AND last_name = ?', [nameObj[0], nameObj[1]],  function (err, empNo){
 
-          console.log ("empNo");
-          console.log (typeof(empNo));
-          console.log(empNo);  
-        
+            // get role number
+            const roleStr = roleToUpdate.replace( /"/g, "");
+            db.query('SELECT id from role where title = ?', [roleStr], function (err, rolNo){
+              r_id = (rolNo[0].id);
+              e_id = (empNo[0].ID);
+            
+              // update employee
+              db.query('UPDATE employee SET employee.role_id = ? WHERE employee.id = ?', [r_id, e_id], function (err, results){
+                console.log("Employee successfully updated!");
+                console.clear();
+                mainMenu();
+              }); // end of Update
 
-        // get role number
-        const roleStr = roleToUpdate.replace( /"/g, "");
-        db.query('SELECT id from role where title = ?', [roleStr], function (err, rolNo){
-          r_id = (rolNo[0].id);
-          e_id = (empNo[0].ID);
-
-          console.log("r_id and e_id");
-          console.log(r_id, e_id);
-
-        
-        // update employee
-        // r_id = JSON.stringify(rolNo);
-        // e_id = JSON.stringify(empNo);
-        
-       db.query('UPDATE employee SET employee.role_id = ? WHERE employee.id = ?', [r_id, e_id], function (err, results){
-        console.log("success");
-       mainMenu();
-       });
-      });
-    });
-        
-      
-
-
-
-
-
-
+            }); // end of get role number
+          }); // end of get employee number
         }); // end of roleList then
       }); // end of roleList query
     }); // end of empList then
   }); // end of empList query
 }; // end of modifyRole
-
-function updEmpMngr(){};
-function updEmpMngr(){};
-
 
 // ADD MENU
 function addMenu() {
@@ -375,8 +334,9 @@ function addMenu() {
       }, 
     
     ]).then ((answer) => {
-        switch (answer.modifyTask) {
+        switch (answer.addTasks) {
           case "Add a new Employee":
+            console.clear();
             addEmp();
             break;
           case "Add a new Manager":
@@ -387,11 +347,87 @@ function addMenu() {
             break;
         }
   }) 
-} // end of addMenu
+}; // end of addMenu
 
-function addEmp(){};
-function addMngr(){};
-function addDept(){};
+function addEmp(){
+console.log("addEmp");
+  const roleList = [];
+    db.query('SELECT title AS roleid from role', function (err, results) {
+      for (i = 0; i < results.length; i++){
+        if(!roleList.includes(results[i].roleid)){
+          roleList.push(results[i].roleid);
+        }; // end of if
+      }; // end of for
+
+  const mngrList = [];
+    db.query('SELECT CONCAT(manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id', function (err, results) {
+
+      for (i = 0; i < results.length; i++){
+        if(!mngrList.includes(results[i].Manager)){
+          mngrList.push(results[i].Manager);
+        }; // end of if
+      }; // end of for
+
+    inquirer
+    .prompt([
+      {
+      type:'input',
+      name:'empFirstName',
+      message: "What is the Employee's First Name?",
+      }, 
+
+      {
+        type:'input',
+        name:'empLastName',
+        message: "What is the Employee's Last Name?",
+      }, 
+
+      {
+        type:'list',
+        name:'empRole',
+        message: "What is the Employee's role?",
+        choices: roleList,
+      }, 
+
+      {
+        type:'list',
+        name:'empMngr',
+        message: "Who is the Employee's manager?",
+        choices: mngrList,
+      }, 
+  
+        ]).then ((answer) => {
+
+          // get role.id
+          const roleStr = answer.empRole.replace( /"/g, "");
+          db.query('SELECT id from role where title = ?', [roleStr], function (err, rolNo){
+            r_id = (rolNo[0].id);
+
+            // get manager.id
+            const idStr = answer.empMngr.replace( /"/g, "");
+            db.query('SELECT employee.id FROM employee WHERE CONCAT (employee.first_name, " ", employee.last_name) = ?', [idStr], function (err, idNo){
+              e_id = (idNo[0].id);
+
+              // update database
+              db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [answer.empFirstName, answer.empLastName, r_id, e_id], function (err, result) {
+                console.clear();
+                console.log("Employee has been successfully added!");
+                mainMenu();
+              }); // end of update database
+            });// end of manager.id query
+          }); // end of role.id query
+        }); // end of then
+      }) // end of mngrList query
+    }); // end of roleList query
+}; // end of addEmployee
+
+function addMngr(){
+
+}; // end of addMngr
+
+function addDept(){
+
+}; // end of add Dept
 
 
 function exit(){
@@ -399,11 +435,5 @@ function exit(){
   console.log("Thanks.  Have a nice day!")
   process.exit();
 };
-
-
-
-
-
-
 
 module.exports = mainMenu
