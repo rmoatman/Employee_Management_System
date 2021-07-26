@@ -51,7 +51,6 @@ function mainMenu(){
     }) 
 }// end of main menu
 
-
 // VIEW MENU
 function viewMenu() {
   inquirer
@@ -82,7 +81,7 @@ function viewMenu() {
           viewAllEmpByMng();
           break;
       case "View all Employees in a specific Department":
-          viewAAllEmpByDept();
+          viewAllEmpByDept();
           break;
       case "View a Single Employee":
           viewSingEmp();
@@ -92,21 +91,20 @@ function viewMenu() {
 }; // end of viewMenu
 
 function viewAllEmp() {
-  console.log("All Employees:");
   db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department, role.title AS Title FROM department, employee, role WHERE employee.manager_id=role.id AND role.id=department.id', function (err, results) {
+    console.log("");
+    console.log("All Employees:")
     console.table(results);
-    //console.table(JSON.stringify(results));
+    console.log("");
     mainMenu();
   });
 }; // end of viewAllEmp();
 
-function viewAllEmpByRol(){
+function viewAllEmpByRol() {
 
   const roleList = [];
 
   db.query('SELECT title FROM role', function (err, results) {
-    console.log("results");
-    console.log(results);
     for (i = 0; i < results.length; i++){
       if(!roleList.includes(results[i].title)){
         roleList.push(results[i].title);
@@ -127,15 +125,18 @@ function viewAllEmpByRol(){
 
       db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, role.title AS Role, dept_name AS Department FROM role INNER JOIN employee ON role.id = employee.role_id INNER JOIN department ON role.department_id = department.id WHERE role.title = ?', [answer.viewRole], function (err, results) {
 
+        console.log("");
+        console.log(`Employees who have the title of ${answer.viewRole}:`)
         console.table(results);
+        console.log("");
         mainMenu();
+        
       }) // end of query
     }) // end of then
   }) // end of inquirer
 }; // end of viewAllEmpByRol
 
-
-function viewAllEmpByMng(){
+function viewAllEmpByMng() {
 
   const mngrList = [];
   
@@ -156,27 +157,100 @@ function viewAllEmpByMng(){
         {
         type:'list',
         name:'viewMngr',
-        message: "Which manager you like to view?",
+        message: "Which manager would you like to view?",
         choices: mngrList,
         }, 
       ]).then ((answer) => {
   
         db.query('SELECT CONCAT(employee.first_name, " ", employee.last_name) AS Employee, CONCAT (manager_name.first_name, " ", manager_name.last_name) AS Manager FROM employee INNER JOIN employee AS manager_name ON employee.manager_id = manager_name.id WHERE CONCAT (manager_name.first_name, " ", manager_name.last_name) = ?', [answer.viewMngr], function (err, results) {
-  
+        
+        console.log("");
+        console.log(`Employees who work for ${answer.viewMngr}:`)
         console.table(results);
+        console.log("");
+        mainMenu();
+ 
+
+        }) // end of query
+      }) // end of then
+    }) // end of inquirer
+}; // end of viewAllEmpByMngr
+
+function viewAllEmpByDept() {
+  const deptList = [];
+  
+    db.query('SELECT dept_name FROM department', function (err, results) {
+      console.log("results");
+      console.log(results);
+      console.log
+      for (i = 0; i < results.length; i++){
+        if(!deptList.includes(results[i].dept_name)){
+          deptList.push(results[i].dept_name);
+        };
+      }
+  
+    console.clear();
+  
+    inquirer
+      .prompt([
+        {
+        type:'list',
+        name:'viewDept',
+        message: "Which department would you like to view?",
+        choices: deptList,
+        }, 
+      ]).then ((answer) => {
+  
+        db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department FROM department, employee, role WHERE employee.manager_id=role.id   AND role.id=department.id AND dept_name = ?', [answer.viewDept], function (err, results) {
+        
+        console.log("");
+        console.log(`Employees in ${answer.viewDept}`);
+        console.table(results);
+        console.log("");
         mainMenu();
 
         }) // end of query
       }) // end of then
     }) // end of inquirer
-  }; // end of viewAllEmpByRol
+}; // end of viewAllEmpByDept
 
+function viewSingEmp() {
+  const empList = [];
+  
+    db.query('SELECT CONCAT(first_name, " ", last_name) AS Employee FROM employee', function (err, results) {
+      console.log("results");
+      console.log(results);
+      console.log
+      for (i = 0; i < results.length; i++){
+        if(!empList.includes(results[i].Employee)){
+          empList.push(results[i].Employee);
+        };
+      }
+  
+    console.clear();
+  
+    inquirer
+      .prompt([
+        {
+        type:'list',
+        name:'viewEmp',
+        message: "Which Employee would you like to review?",
+        choices: empList,
+        }, 
+      ]).then ((answer) => {
+  
+        db.query('SELECT CONCAT(employee.first_name, " ", employee.last_name) AS Employee, role.title AS Title, role.salary AS Salary, department.dept_name AS Department FROM department, employee, role WHERE employee.role_id=role.id AND role. department_id=department.id AND CONCAT(employee.first_name, " ", employee.last_name) = ?', [answer.viewEmp], function (err, results) {
+  
+        console.log("");
+        console.table(results);
+        console.log("");
+        mainMenu();
 
+        }) // end of query
+      }) // end of then
+    }) // end of inquirer
+  }; // end of viewSingEMp
 
-
-
-function viewAAllEmpByDept(){};
-function viewSingEmp(){}
 
 
 // MODIFY MENU
@@ -242,6 +316,8 @@ function addMenu() {
 function addEmp(){};
 function addMngr(){};
 function addDept(){};
+
+
 function exit(){
   console.clear();
   console.log("Thanks.  Have a nice day!")
