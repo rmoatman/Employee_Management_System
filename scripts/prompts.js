@@ -51,6 +51,7 @@ function mainMenu(){
 
 // VIEW MENU
 function viewMenu() {
+  
   inquirer
   .prompt([
     {
@@ -89,6 +90,7 @@ function viewMenu() {
 }; // end of viewMenu
 
 function viewAllEmp() {
+
   db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, role.title AS Role, dept_name AS Department FROM role INNER JOIN employee 		ON role.id = employee.role_id INNER JOIN department 		ON role.department_id = department.id', function (err, results) {
     console.log("");
     console.log("All Employees:")
@@ -350,7 +352,6 @@ function addMenu() {
 }; // end of addMenu
 
 function addEmp(){
-console.log("addEmp");
   const roleList = [];
     db.query('SELECT title AS roleid from role', function (err, results) {
       for (i = 0; i < results.length; i++){
@@ -422,13 +423,73 @@ console.log("addEmp");
 }; // end of addEmployee
 
 function addMngr(){
+  const roleList = [];
+    db.query('SELECT title AS roleid from role', function (err, results) {
+      for (i = 0; i < results.length; i++){
+        if(!roleList.includes(results[i].roleid)){
+          roleList.push(results[i].roleid);
+        }; // end of if
+      }; // end of for
 
+    inquirer
+    .prompt([
+      {
+      type:'input',
+      name:'mngFirstName',
+      message: "What is the Manager's First Name?",
+      }, 
+
+      {
+        type:'input',
+        name:'mngLastName',
+        message: "What is the Manager's Last Name?",
+      }, 
+
+      {
+        type:'list',
+        name:'mngRole',
+        message: "What is the Manager's role?",
+        choices: roleList,
+      }, 
+
+        ]).then ((answer) => {
+
+          // get role.id
+          const roleStr = answer.mngRole.replace( /"/g, "");
+          db.query('SELECT id from role where title = ?', [roleStr], function (err, rolNo){
+            r_id = (rolNo[0].id);
+
+              // update database
+              db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', [answer.mngFirstName, answer.mngLastName, r_id], function (err, result) {
+                console.clear();
+                console.log("Employee has been successfully added!");
+                mainMenu();
+              }); // end of update database
+          }); // end of role.id query
+        }); // end of then
+    }); // end of roleList query
 }; // end of addMngr
 
 function addDept(){
 
-}; // end of add Dept
+  inquirer
+    .prompt([
+      {
+      type:'input',
+      name:'deptName',
+      message: "What is the Department's name?",
+      }, 
 
+      ]).then ((answer) => {
+
+        // update database
+        db.query('INSERT INTO department (dept_name) VALUES (?)', [answer.deptName], function (err, result) {
+          console.clear();
+          console.log("Department has been successfully added!");
+          mainMenu();
+        }); // end of update database
+      }); // end of then
+}; // end of add Dept
 
 function exit(){
   console.clear();
