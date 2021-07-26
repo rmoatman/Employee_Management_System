@@ -26,7 +26,7 @@ function mainMenu(){
       message: "What would you like to do?",
       choices: [
         "View Existing Employee, Manager, or Department",
-        "Modify Existing Employee, Manager, or Department",
+        "Modify Employee Role",
         "Add New Employee, Manager, or Department",
         "EXIT",
         ],
@@ -38,8 +38,8 @@ function mainMenu(){
             console.clear();
             viewMenu();
             break;
-          case "Modify Existing Employee, Manager, or Department":
-            modifyMenu();
+          case "Modify Employee Role":
+            modifyRole();
             break;
           case "Add New Employee, Manager, or Department":
             addMenu();
@@ -91,7 +91,7 @@ function viewMenu() {
 }; // end of viewMenu
 
 function viewAllEmp() {
-  db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, dept_name AS Department, role.title AS Title FROM department, employee, role WHERE employee.manager_id=role.id AND role.id=department.id', function (err, results) {
+  db.query('SELECT employee.id AS ID, CONCAT(first_name, " ", last_name) AS Employee, role.title AS Role, dept_name AS Department FROM role INNER JOIN employee 		ON role.id = employee.role_id INNER JOIN department 		ON role.department_id = department.id', function (err, results) {
     console.log("");
     console.log("All Employees:")
     console.table(results);
@@ -237,6 +237,7 @@ function viewSingEmp() {
         message: "Which Employee would you like to review?",
         choices: empList,
         }, 
+
       ]).then ((answer) => {
   
         db.query('SELECT CONCAT(employee.first_name, " ", employee.last_name) AS Employee, role.title AS Title, role.salary AS Salary, department.dept_name AS Department FROM department, employee, role WHERE employee.role_id=role.id AND role. department_id=department.id AND CONCAT(employee.first_name, " ", employee.last_name) = ?', [answer.viewEmp], function (err, results) {
@@ -254,30 +255,105 @@ function viewSingEmp() {
 
 
 // MODIFY MENU
-function modifyMenu() {
-  inquirer
-  .prompt([
-    {
-    type:'list',
-    name:'modifyTasks',
-    message: "What would you like modify?",
-    choices: [
-      "Update Employee Manager",
-      "Update Employee Department",
-      ],
-    }, 
-  
-  ]).then ((answer) => {
-      switch (answer.modifyTask) {
-        case "Update Employee Manager":
-          updEmpMngr();
-          break;
-        case "Update Employee Department":
-          updEmpDept();
-          break;
-      }
-  }) 
-} // end of modifyMenu
+function modifyRole() {
+
+  // get employee list
+  const empList = [];
+  db.query('SELECT CONCAT(first_name, " ", last_name) AS Employee FROM employee', function (err, results) {
+    for (i = 0; i < results.length; i++){
+      if(!empList.includes(results[i].Employee)){
+        empList.push(results[i].Employee);
+      };
+    };
+
+    inquirer
+    .prompt([
+      {
+      type:'list',
+      name:'empToMod',
+      message: "Which employee would you like to modify?",
+      choices: empList
+      }, 
+    
+    ]).then ((answer) => {
+      // get roleList
+      const emplToUpdate = JSON.stringify(answer.empToMod);
+      console.log("emplToUpdate");
+      console.log(emplToUpdate);
+
+      const roleList = [];
+      db.query('SELECT title AS roleid from role', function (err, results) {
+        for (i = 0; i < results.length; i++){
+          if(!roleList.includes(results[i].roleid)){
+            roleList.push(results[i].roleid);
+          };
+        };
+
+        inquirer
+        .prompt([
+          {
+          type:'list',
+          name:'newRole',
+          message: "What is the New Role?",
+          choices: roleList
+          }, 
+
+        ]).then ((answer) => {
+          const roleToUpdate = JSON.stringify(answer.newRole);
+          console.log("roleToUpdate");
+          console.log(typeof(roleToUpdate));
+          console.log(roleToUpdate);
+
+          const nameStr = emplToUpdate.replace( /"/g, "");
+          const nameObj = nameStr.split(" ");
+         // const last = emplToUpdate.split(" ");
+          console.log("nameObj");
+          console.log(nameObj[0]);
+          console.log(nameObj[1]);
+          //console.log(last);
+
+
+        // get employee number
+          db.query('SELECT employee.id AS ID FROM employee WHERE first_name = ? AND last_name = ?', [nameObj[0], nameObj[1]],  function (err, empNo){
+
+          console.log ("empNo");
+          console.log (typeof(empNo));
+          console.log(empNo);  
+        
+
+        // get role number
+        const roleStr = roleToUpdate.replace( /"/g, "");
+        db.query('SELECT id from role where title = ?', [roleStr], function (err, rolNo){
+          r_id = (rolNo[0].id);
+          e_id = (empNo[0].ID);
+
+          console.log("r_id and e_id");
+          console.log(r_id, e_id);
+
+        
+        // update employee
+        // r_id = JSON.stringify(rolNo);
+        // e_id = JSON.stringify(empNo);
+        
+       db.query('UPDATE employee SET employee.role_id = ? WHERE employee.id = ?', [r_id, e_id], function (err, results){
+        console.log("success");
+       mainMenu();
+       });
+      });
+    });
+        
+      
+
+
+
+
+
+
+        }); // end of roleList then
+      }); // end of roleList query
+    }); // end of empList then
+  }); // end of empList query
+}; // end of modifyRole
 
 function updEmpMngr(){};
 function updEmpMngr(){};
