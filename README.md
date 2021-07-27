@@ -1,4 +1,4 @@
-# Employee Tracker
+# Employee Management System
 
 [<img src="https://img.shields.io/badge/license-MIT-brightgreen?link=https://opensource.org/licenses/MIT">](https://opensource.org/licenses/MIT)
 
