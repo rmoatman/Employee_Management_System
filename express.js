@@ -13,15 +13,11 @@ const path = require("path");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-
 //FUNCTIONS
-
 function init(){
     emsBanner(); // displays EMS Banner from banner.js
     mainMenu(); // mainMenu is in prompts.js
 };// end of init
-
-
 
 // LISTENER AND EXECUTION
 app.listen(PORT, () => {
